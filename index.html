@@ -3,26 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Visite 3D de la salle du hackathon.">
+  <meta name="theme-color" content="#173c37">
+  <meta name="description" content="Un exercice de formation au diagnostic de fuite dans une salle 3D.">
   <link rel="icon" href="data:,">
-  <title>Salle du hackathon</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <title>Diagnostic de fuite · Feedo</title>
 </head>
 <body>
-  <main>
-    <header>
-      <h1>Salle du hackathon</h1>
-      <span id="badge"></span>
-    </header>
-    <section id="viewport" aria-label="Visite 3D">
-      <div id="view" tabindex="0" aria-label="Vue 3D. Glisser pour regarder. Flèches ou ZQSD pour se déplacer." aria-describedby="controls"></div>
-      <div id="status" role="status">Chargement de la salle…</div>
-      <nav id="stations" aria-label="Points de vue"></nav>
+  <a href="#intervention" class="skip">Accéder aux décisions</a>
+  <header class="app-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#exercice" aria-label="Feedo, revenir à l’exercice">
+        <span aria-hidden="true" class="brand-mark"></span>Feedo
+      </a>
+      <span class="brand-context">Formation terrain</span>
+      <nav class="page-nav" aria-label="Navigation">
+        <a href="#exercice">Exercice</a>
+        <a href="#journal">Journal</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell" id="exercice">
+    <div class="intro">
+      <div>
+        <p class="eyebrow eyebrow-intro">Maintenance hydraulique</p>
+        <h1>Diagnostic de fuite</h1>
+        <p class="goal">Identifiez le circuit qui fuit et prouvez que la réparation tient après remise en service.</p>
+      </div>
+      <div class="case-box" aria-label="Cas en cours">
+        <span id="case-count" class="case-count">Cas 01 / 02</span>
+        <button type="button" id="restart" class="text-control"><span aria-hidden="true">↺</span> Recommencer</button>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <section class="room-card card" aria-labelledby="room-title">
+        <div class="room-head">
+          <div class="room-name">
+            <span id="badge" class="eyebrow">Salle reconstituée</span>
+            <h2 id="room-title">AWS Loft <span>·</span> San Francisco</h2>
+          </div>
+          <button type="button" id="focus-leak" class="secondary"><span class="crosshair" aria-hidden="true"></span>Cadrer la fuite</button>
+        </div>
+        <div id="viewport">
+          <div id="view" tabindex="0" aria-label="Salle d’exercice en 3D" aria-describedby="controls"></div>
+          <div id="status" role="status">Chargement de la salle…</div>
+          <div class="scene-key" id="scene-key" hidden aria-label="Circuits affichés">
+            <span><i class="line-a"></i>Circuit A</span><span><i class="line-b"></i>Circuit B</span>
+          </div>
+        </div>
+        <div class="room-tools">
+          <div id="controls">
+            <span class="desktop-instructions"><kbd>↑</kbd><kbd>↓</kbd> Avancer et reculer</span>
+            <span>Glisser pour regarder</span>
+          </div>
+          <details class="viewpoints">
+            <summary>Points de vue</summary>
+            <nav id="stations" aria-label="Points de vue de la salle"></nav>
+          </details>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <section class="intervention card" id="intervention" aria-labelledby="stage-title">
+          <div class="step-meta">
+            <span class="eyebrow" id="stage-number"></span>
+            <div class="step-bars" id="step-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          </div>
+          <h2 id="stage-title">Observer la fuite</h2>
+          <div id="feedback" aria-live="polite" aria-atomic="true"><p id="coach"></p></div>
+          <div class="inline-readings" id="readings-block" hidden>
+            <h3>Débits simulés <span>· L/min</span></h3><div id="readings"></div>
+          </div>
+          <div id="actions"></div>
+        </section>
+        <section class="team card" aria-labelledby="team-title">
+          <div class="section-heading">
+            <h2 id="team-title">Équipe terrain</h2>
+            <span class="small-label" id="team-count"></span>
+          </div>
+          <div id="agents"></div>
+        </section>
+      </aside>
+    </div>
+
+    <section class="card results" id="results" aria-labelledby="results-title" hidden>
+      <div class="section-heading"><h2 id="results-title">Bilan de l’exercice</h2></div>
+      <div id="summary"></div>
     </section>
-    <footer id="controls">
-      <span><kbd>ZQSD</kbd> <kbd>WASD</kbd> <kbd>↑ ↓</kbd> Se déplacer</span>
-      <span><kbd>← →</kbd> ou glisser pour regarder</span>
-    </footer>
+
+    <div class="records">
+      <section class="card ledger" id="journal" aria-labelledby="log-title">
+        <div class="section-heading"><h2 id="log-title">Journal des décisions</h2><span id="log-count" class="small-label"></span></div>
+        <ol id="log"></ol>
+        <div id="sponsor-tools"></div>
+      </section>
+      <section class="card measurements" id="measurements" aria-labelledby="data-title" hidden>
+        <div class="section-heading"><h2 id="data-title">Observations recueillies</h2></div>
+        <figure class="evidence-photo" id="evidence-photo" hidden><img id="captured-photo" alt="Vue de la salle au moment du constat"><figcaption>Photo du constat</figcaption></figure>
+        <ul id="evidence" class="evidence"></ul>
+      </section>
+    </div>
   </main>
   <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/training/ui.js"></script>
 </body>
 </html>
