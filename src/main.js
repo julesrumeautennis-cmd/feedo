@@ -3,12 +3,14 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { makeFloorReflection } from './floor-reflection.js';
 import { room, screenPositions } from './room.js';
+import { createIncident } from './leak/incident.js';
+import { batchRoom } from './leak/static-room.js';
 import './style.css';
 
 const view = document.querySelector('#view');
 const status = document.querySelector('#status');
 const stations = document.querySelector('#stations');
-document.querySelector('#badge').textContent = 'Salle reconstituée';
+
 
 const keys = new Set();
 const movementKeys = new Set([
@@ -87,9 +89,10 @@ async function start() {
 
   function resize() {
     const { clientWidth: width, clientHeight: height } = view;
+    if (!width || !height) return;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
     renderer.setSize(width, height);
     redraw = true;
   }
@@ -108,10 +111,25 @@ async function start() {
       node.material.bumpScale = .011;
     }
   });
+  batchRoom(model);
   scene.add(model, makeFloorReflection(room.width, room.depth));
+  const incident = createIncident(scene);
+  const frameIncident = (close = false) => {
+    const { position, aim } = incident.cameraTarget(close, view.clientWidth / Math.max(view.clientHeight, 1) < .95);
+    camera.position.set(...position);
+    camera.lookAt(...aim);
+    redraw = true;
+  };
+  window.addEventListener('feedo:state', ({ detail }) => {
+    incident.setState(detail);
+    redraw = true;
+  });
+  window.addEventListener('feedo:focus', ({ detail }) => {
+    frameIncident(detail !== 'overview' && detail?.mode !== 'overview');
+  });
   renderer.shadowMap.needsUpdate = true;
   view.append(renderer.domElement);
-  goTo(...room.entrance);
+  frameIncident();
   resize();
   new ResizeObserver(resize).observe(view);
 
@@ -147,8 +165,14 @@ async function start() {
   window.addEventListener('blur', () => keys.clear());
 
   let previous = performance.now();
+  let elapsed = 0;
+  const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
   renderer.setAnimationLoop(now => {
-    const dt = Math.min((now - previous) / 1000, .045);
+    if (document.hidden) { previous = now; return; }
+    const interval = motionPreference.matches ? 100 : 1000 / 30;
+    if (!redraw && now - previous < interval - 1) return;
+    const dt = Math.min((now - previous) / 1000, .15);
+    elapsed += dt;
     previous = now;
     const turn = Number(keys.has('ArrowLeft')) - Number(keys.has('ArrowRight'));
     camera.rotation.y += turn * dt * 1.7;
@@ -162,10 +186,12 @@ async function start() {
     const nextZ = z - (strafe * Math.sin(yaw) + forward * Math.cos(yaw)) * step;
     if (canStand(nextX, z)) camera.position.x = nextX;
     if (canStand(camera.position.x, nextZ)) camera.position.z = nextZ;
-    if (redraw || turn || forward || strafe) renderer.render(scene, camera);
+    incident.animate(dt, elapsed);
+    renderer.render(scene, camera);
     redraw = false;
   });
   status.hidden = true;
+  window.dispatchEvent(new Event('feedo:scene-ready'));
 }
 
 start().catch(error => {
