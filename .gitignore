@@ -9,3 +9,5 @@ logs/*.log
 __pycache__/
 *.py[cod]
 logs/queries
+test-results/
+playwright-report/
