@@ -53,7 +53,13 @@ jobs:
         run: npm test
       - name: Build the application and room
         run: npm run build
-      - name: Install Chromium for the browser tests
-        run: npx --no-install playwright install --with-deps chromium
+      - name: Select Chromium for the browser tests
+        run: |
+          if command -v google-chrome > /dev/null; then
+            google-chrome --version
+            echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx --no-install playwright install --with-deps chromium
+          fi
       - name: Test the browser journey
         run: npm run test:e2e
