@@ -1,0 +1,7 @@
+default_environment: local
+environments:
+  local:
+    connections:
+      duckdb:
+        - name: feedo-local
+          path: "${FEEDO_TRAINING_DB}"
