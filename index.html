@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Visite 3D de la salle du hackathon.">
+  <link rel="icon" href="data:,">
+  <title>Salle du hackathon</title>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Salle du hackathon</h1>
+      <span id="badge"></span>
+    </header>
+    <section id="viewport" aria-label="Visite 3D">
+      <div id="view" tabindex="0" aria-label="Vue 3D. Glisser pour regarder. Flèches ou ZQSD pour se déplacer." aria-describedby="controls"></div>
+      <div id="status" role="status">Chargement de la salle…</div>
+      <nav id="stations" aria-label="Points de vue"></nav>
+    </section>
+    <footer id="controls">
+      <span><kbd>ZQSD</kbd> <kbd>WASD</kbd> <kbd>↑ ↓</kbd> Se déplacer</span>
+      <span><kbd>← →</kbd> ou glisser pour regarder</span>
+    </footer>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
