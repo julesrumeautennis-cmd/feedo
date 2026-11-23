@@ -1,0 +1,59 @@
+{
+  "model": {
+    "kind": "logistic-regression",
+    "features": [
+      "flowMinusExpected",
+      "pressureLoss"
+    ],
+    "center": [
+      1.7436969,
+      4.176375
+    ],
+    "scale": [
+      2.1639275,
+      5.3748798
+    ],
+    "weights": [
+      2.1408577,
+      1.4331426,
+      4.6839862
+    ]
+  },
+  "evaluation": {
+    "trainingIncidents": 160,
+    "heldOutIncidents": 40,
+    "modelCorrect": 40,
+    "rawFlowBaselineCorrect": 38,
+    "source": "simulated"
+  },
+  "cases": {
+    "A": [
+      {
+        "branch": "A",
+        "flow": 3.383,
+        "expected": 0.0,
+        "pressureLoss": 8.385
+      },
+      {
+        "branch": "B",
+        "flow": 7.983,
+        "expected": 8.0,
+        "pressureLoss": 1.925
+      }
+    ],
+    "B": [
+      {
+        "branch": "A",
+        "flow": 9.942,
+        "expected": 10.0,
+        "pressureLoss": -0.825
+      },
+      {
+        "branch": "B",
+        "flow": 5.342,
+        "expected": 2.0,
+        "pressureLoss": 6.995
+      }
+    ]
+  }
+}

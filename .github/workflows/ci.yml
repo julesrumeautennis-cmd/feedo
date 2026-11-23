@@ -1,0 +1,65 @@
+name: Feedo CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: feedo-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out the candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Install verified Bruin release
+        env:
+          BRUIN_VERSION: v0.11.832
+          BRUIN_SHA256: fc2e83e9a41313a006cab20aa8bb38065521af4ee2c38c1f19e9b40b2abc2c50
+        run: |
+          cd "$RUNNER_TEMP"
+          archive=bruin_Linux_x86_64.tar.gz
+          curl --fail --silent --show-error --location --retry 3 --output "$archive" \
+            "https://github.com/bruin-data/bruin/releases/download/$BRUIN_VERSION/$archive"
+          echo "$BRUIN_SHA256  $archive" | sha256sum --check
+          mkdir -p feedo-tools
+          tar -xzf "$archive" -C feedo-tools bruin
+          echo "$RUNNER_TEMP/feedo-tools" >> "$GITHUB_PATH"
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify Bruin checks and reproduce the trained model
+        run: python3 scripts/train-feedo.py --check
+      - name: Test the training and review policies
+        run: npm test
+      - name: Build the application and room
+        run: npm run build
+      - name: Select Chromium for the browser tests
+        run: |
+          if command -v google-chrome > /dev/null; then
+            google-chrome --version
+            echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx --no-install playwright install --with-deps chromium
+          fi
+      - name: Test the browser journey
+        run: npm run test:e2e

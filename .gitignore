@@ -3,3 +3,11 @@ dist/
 .vercel/
 .env*
 public/salle.glb
+
+logs/runs
+logs/*.log
+__pycache__/
+*.py[cod]
+logs/queries
+test-results/
+playwright-report/
