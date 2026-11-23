@@ -166,6 +166,31 @@ async function start() {
 
   let previous = performance.now();
   let elapsed = 0;
+  window.addEventListener('feedo:photograph', () => {
+    let url = null;
+    try {
+      const canvas = renderer.domElement;
+      if (canvas.width && canvas.height && !renderer.getContext().isContextLost()) {
+        frameIncident(true);
+        incident.animate(0, elapsed);
+        // Copy immediately after the draw. WebGL may discard its drawing buffer
+        // as soon as the browser composites this frame.
+        renderer.render(scene, camera);
+        const thumbnail = document.createElement('canvas');
+        const ratio = Math.min(1, 480 / Math.max(canvas.width, canvas.height));
+        thumbnail.width = Math.max(1, Math.round(canvas.width * ratio));
+        thumbnail.height = Math.max(1, Math.round(canvas.height * ratio));
+        const context = thumbnail.getContext('2d');
+        if (context) {
+          context.drawImage(canvas, 0, 0, thumbnail.width, thumbnail.height);
+          url = thumbnail.toDataURL('image/jpeg', .76);
+        }
+      }
+    } catch (error) {
+      console.warn('Capture de la vue 3D indisponible.', error);
+    }
+    window.dispatchEvent(new CustomEvent('feedo:photo-ready', { detail: { url } }));
+  });
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
   renderer.setAnimationLoop(now => {
     if (document.hidden) { previous = now; return; }
